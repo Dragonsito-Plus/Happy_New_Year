@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Celebración y minijuego de Año Nuevo 2026</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Fondo y transición suave para cambios de imagen */
+    body {
+      margin:0; font-family:Arial,sans-serif; color:white; text-align:center;
+      min-height:100vh; overflow-x:hidden;
+      background-size:cover; background-position:center;
+      transition: background-image 0.8s ease-in-out;
+    }
+    /* Fondo multicolor animado en la vista de conteo */
+    .bg-animate {
+      background: linear-gradient(-45deg,#ff3b3b,#27ae60,#f1c40f,#3498db);
+      background-size:400% 400%;
+      animation:bgShift 10s ease infinite;
+    }
+    @keyframes bgShift {0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+
+    /* Copos de nieve */
+    .snowflake{position:fixed;top:-10px;color:white;font-size:1.5em;pointer-events:none;animation:fall linear forwards;z-index:999;}
+    @keyframes fall{to{transform:translateY(100vh);opacity:0;}}
+
+
+    /* Vistas */
+    #countdownView{padding:20px 10px;}
+    #countdown{font-size:2em;margin-top:10px;}
+    #finalView{display:none;padding:20px 10px;}
+
+    /* Mensajes en la vista final */
+    #finalMessage{color:gold;margin-bottom:8px;}
+    #gameNotice{margin-top:10px;font-size:1.2em;color:#ffea00;text-shadow:0 0 6px rgba(0,0,0,0.6);}
+
+    /* Mensaje especial “Te robaste la navidad” */
+    #specialMsg{
+      position:fixed;top:20px;left:50%;transform:translateX(-50%);
+      background:rgba(255,0,0,0.85);padding:10px 20px;border-radius:8px;
+      font-size:1.15em;color:#fff;display:none;z-index:2000;
+      box-shadow:0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    /* Galería por persona */
+    #photoGallery{margin:20px auto;max-width:1400px;} /* aumentado */
+    #photoGallery section{margin-bottom:26px;}
+    #photoGallery h3{
+      margin:14px 0 10px 0;color:#ffd700;
+      text-shadow:0 0 6px rgba(0,0,0,0.6);
+      font-size:1.25em;text-align:left;
+    }
+    #photoGallery .grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;} /* centrar */
+    #photoGallery img{
+      width:220px;max-width:32vw;height:auto; /* más anchas */
+      border-radius:10px;box-shadow:0 0 8px rgba(0,0,0,0.5);
+      background:#222;cursor:pointer;
+    }
+
+    /* Botón y área del minijuego */
+    #startGameBtn{margin:16px auto;padding:10px 20px;font-size:1.1em;}
+    #gameArea{
+      position:relative;margin:18px auto;max-width:900px;height:360px;
+      border:2px solid rgba(255,255,255,0.25);border-radius:12px;
+      background:rgba(0,0,0,0.25);overflow:hidden;
+    }
+
+    /* Marcador flotante dentro del área */
+    #floatingScore{
+      position:absolute;top:10px;left:10px;
+      background:rgba(0,0,0,0.55);padding:8px 12px;border-radius:8px;
+      font-size:1em;color:#fff;display:none;
+    }
+
+    /* Vidas y Game Over */
+    #lives{margin-top:6px;font-size:1em;}
+    #gameOver{display:none;margin-top:14px;font-size:1.3em;color:#ff5b5b;}
+    #retryBtn{display:none;margin-top:10px;padding:8px 16px;font-size:1em;}
+
+    /* Objetos del juego */
+    .petardo,.gift,.tree,.explosion{position:absolute;font-size:2em;cursor:pointer;user-select:none;}
+    .explosion{animation:explode 0.9s ease-out forwards;}
+    @keyframes explode{from{opacity:1;transform:scale(0.6);}to{opacity:0;transform:scale(2);}}
+
+    /* Más rápido en teléfonos */
+    :root{--speed-mult:1;}
+    @media(max-width:600px){:root{--speed-mult:0.7;}}
+    
+    /* Modal de subida privada */
+    #uploadModal{
+      position:fixed;left:0;top:0;width:100%;height:100%;display:none;
+      background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:3000;
+    }
+    #uploadModal .modalContent{
+      background:#111;color:#fff;padding:18px;border-radius:10px;max-width:520px;margin:12px auto;
+      box-shadow:0 6px 20px rgba(0,0,0,0.6);text-align:left;
+    }
+    /* X de eliminación en esquina superior izquierda de cada foto */
+    .xDel{
+      position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.6);border:none;color:#fff;
+      padding:4px 6px;border-radius:6px;cursor:pointer;font-size:0.95em;display:none;
+    }
+    .photoWrapper{position:relative;display:inline-block;}
+    .delBtn{
+      position:absolute;top:6px;right:6px;background:rgba(255,0,0,0.9);border:none;color:#fff;padding:4px 6px;border-radius:6px;cursor:pointer;font-size:0.9em;display:none;
+    }
+    .photoWrapper:hover .delBtn{display:block;}
+    .uploadPrompt{color:#ffd700;margin:8px 0;font-size:0.95em;}
+
+    /* PIN superior */
+    #skipPinBtn{
+      position:fixed;right:12px;top:12px;padding:8px 10px;border-radius:8px;
+      background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.08);cursor:pointer;z-index:2500;
+    }
+
+    /* Modal de imagen fullscreen */
+    #imageModal{
+      position:fixed;left:0;top:0;width:100%;height:100%;display:none;
+      align-items:center;justify-content:center;background:rgba(0,0,0,0.92);z-index:4000;
+    }
+    #imageModal img{
+      max-width:95%;max-height:86%;border-radius:8px;box-shadow:0 12px 36px rgba(0,0,0,0.8);
+    }
+    #imageModal .meta{
+      position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+      color:#fff;font-size:0.95em;background:rgba(0,0,0,0.45);padding:8px 12px;border-radius:8px;
+      display:flex;gap:10px;align-items:center;
+    }
+    #imageModal .closeBtn{
+      position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.12);
+      padding:8px 10px;border-radius:8px;cursor:pointer;
+    }
+    #imageModal .imageDelBtn{
+      background:#ff5b5b;border:none;color:#fff;padding:6px 8px;border-radius:6px;cursor:pointer;
+    }
+
+    /* Modal de PIN */
+    #pinModal{
+      position:fixed;left:0;top:0;width:100%;height:100%;display:none;
+      align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3500;
+    }
+    #pinModal .modalContent{
+      background:#111;color:#fff;padding:16px;border-radius:10px;max-width:420px;width:90%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.6);text-align:center;
+    }
+    #pinModal input[type="password"]{
+      width:80%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.12);
+      background:rgba(0,0,0,0.35);color:#fff;margin-top:8px;
+    }
+    #pinModal .pinNotice{color:#ffd700;margin-top:8px;font-size:0.95em;}
+
+    /* Modal de PREVIEW después de validar PIN */
+    #pinPreviewModal{
+      display:none;position:fixed;left:0;top:0;width:100%;height:100%;
+      align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3600;
+    }
+    #pinPreviewModal .modalContent{
+      background:#111;color:#fff;padding:18px;border-radius:10px;max-width:520px;margin:12px auto;
+      box-shadow:0 6px 20px rgba(0,0,0,0.6);text-align:center;
+    }
+  </style>
+</head>
+<body class="bg-animate">
+  <!-- Mensaje especial -->
+  <div id="specialMsg">Te robaste la navidad</div>
+
+  <!-- PIN en esquina superior para saltar conteo -->
+  <button id="skipPinBtn" onclick="openSkipPin()">PIN</button>
+
+  <!-- Vista de cuenta regresiva -->
+  <div id="countdownView">
+    <h2>Cuenta regresiva hasta el 31 de diciembre de 2025, 11:30 PM 🎄</h2>
+    <div id="countdown">Cargando...</div>
+    <div style="margin-top:10px;">
+      <input type="text" id="userName" placeholder="Introduce tu nombre (sin apellido)">
+      <button onclick="saveName()">Guardar nombre</button>
+      <button id="editNameBtn" onclick="enableNameEditing()" style="display:none;margin-left:8px;">Editar</button>
+    </div>
+  </div>
+
+  <!-- Vista final -->
+  <div id="finalView">
+    <h2 id="finalMessage">🎅 ¡Feliz Año Nuevo! 🎆</h2>
+
+    <!-- Nuevo: campo para el deseo de Año Nuevo -->
+    <div id="wishArea" style="margin:10px auto 6px;max-width:900px;text-align:center;">
+      <label for="newYearWish" style="display:block;margin-bottom:6px;color:#fff;font-weight:600;">
+        ¿Qué es lo que más deseas para este nuevo año?
+      </label>
+      <textarea id="newYearWish" rows="2" style="width:80%;max-width:820px;border-radius:8px;padding:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.35);color:#fff;"></textarea>
+      <div style="margin-top:8px;">
+        <button onclick="saveWish()">Guardar deseo</button>
+        <span id="wishSaved" style="margin-left:10px;color:#ffd700"></span>
+      </div>
+    </div>
+
+    <!-- NUEVO: contenedor donde aparecerá el prompt para crear sección si el usuario no tiene sección -->
+    <div id="createSectionPrompt" style="text-align:center;margin-top:10px;display:none;">
+      <!-- contenido inyectado por JS -->
+    </div>
+
+    <div id="gameNotice"></div>
+
+    <!-- Área para introducir nombre si la cuenta terminó sin nombre -->
+    <div id="finalNameArea" style="display:none;margin-top:12px;">
+      <input type="text" id="finalUserName" placeholder="Introduce tu nombre (sin apellido)">
+      <button onclick="saveNameFromFinal()">Guardar</button>
+      <button id="finalCancelEdit" onclick="hideFinalNameArea()" style="display:inline-block;margin-left:8px;">Cancelar</button>
+    </div>
+
+    <!-- Galería alfabética -->
+    <div id="photoGallery">
+      <!-- Albenis -->
+      <section>
+        <h3>Albenis</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/HsdTFtKH/Imagen-de-Whats-App-2025-11-30-a-las-17-05-38-1eab6647.jpg" alt="Albenis 1">
+          <img src="https://i.postimg.cc/g20m22mQ/Imagen-de-Whats-App-2025-11-30-a-las-17-05-38-5aab4540.jpg" alt="Albenis 2">
+          <img src="https://i.postimg.cc/3w4h2fyv/Imagen-de-Whats-App-2025-11-30-a-las-17-05-38-66481e1d.jpg" alt="Albenis 3">
+        </div>
+      </section>
+
+      <!-- Alex -->
+      <section>
+        <h3>Alex</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/hGhhJ0bb/Imagen-de-Whats-App-2025-11-30-a-las-17-02-28-64d14af6.jpg" alt="Alex 1">
+          <img src="https://i.postimg.cc/s2JKXsmB/Imagen-de-Whats-App-2025-11-30-a-las-17-02-28-906537a1.jpg" alt="Alex 3">
+          <img src="https://i.postimg.cc/hG0Mjcsx/Imagen-de-Whats-App-2025-11-30-a-las-17-02-28-2756922e.jpg" alt="Alex 4">
+          <img src="https://i.postimg.cc/PqMKxTy1/Imagen-de-Whats-App-2025-11-30-a-las-17-02-28-d1c454c8.jpg" alt="Alex 5">
+        </div>
+      </section>
+
+      <!-- Anibal -->
+      <section>
+        <h3>Anibal</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/RCnjGnV2/Imagen-de-Whats-App-2025-11-30-a-las-17-05-12-1c5916de.jpg" alt="Anibal 1">
+          <img src="https://i.postimg.cc/rwgbz1Qg/Imagen-de-Whats-App-2025-11-30-a-las-17-05-12-452c34e2.jpg" alt="Anibal 2">
+          <img src="https://i.postimg.cc/tJ0v82Cw/Imagen-de-Whats-App-2025-11-30-a-las-17-05-13-7e60b1ea.jpg" alt="Anibal 3">
+          <img src="https://i.postimg.cc/5ywKJLXK/Imagen-de-Whats-App-2025-11-30-a-las-17-05-13-22967d76.jpg" alt="Anibal 4">
+          <img src="https://i.postimg.cc/KvDps7Sb/Imagen-de-Whats-App-2025-11-30-a-las-17-05-13-b84592ef.jpg" alt="Anibal 5">
+        </div>
+      </section>
+
+      <!-- Carlos -->
+      <section>
+        <h3>Carlos</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/jjmMJZNQ/Imagen-de-Whats-App-2025-11-30-a-las-17-00-19-54c7fc04.jpg" alt="Carlos 1">
+          <img src="https://i.postimg.cc/cH7f4mcY/Imagen-de-Whats-App-2025-11-30-a-las-17-00-20-49066a2c.jpg" alt="Carlos 3">
+          <img src="https://i.postimg.cc/VkSMb1RP/Imagen-de-Whats-App-2025-11-30-a-las-17-00-20-b4e467bb.jpg" alt="Carlos 4">
+        </div>
+      </section>
+
+      <!-- Carmen -->
+      <section>
+        <h3>Carmen</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/CMmfPdPt/Imagen-de-Whats-App-2025-11-30-a-las-17-01-02-0dba748d.jpg" alt="Carmen 1">
+          <img src="https://i.postimg.cc/52FY2gxp/Imagen-de-Whats-App-2025-11-30-a-las-17-01-02-9c7648ba.jpg" alt="Carmen 2">
+          <img src="https://i.postimg.cc/Fz8FttJx/Imagen-de-Whats-App-2025-11-30-a-las-17-01-03-46c00e37.jpg" alt="Carmen 4">
+          <img src="https://i.postimg.cc/ZK60kRV5/Imagen-de-Whats-App-2025-11-30-a-las-17-01-03-ff6f68b8.jpg" alt="Carmen 5">
+        </div>
+      </section>
+
+      <!-- Jesús -->
+      <section>
+        <h3>Jesús</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/Wpk1rzRq/Imagen-de-Whats-App-2025-11-30-a-las-16-58-10-39bf4c54.jpg" alt="Jesús 1">
+          <img src="https://i.postimg.cc/FK6hk5T4/Imagen-de-Whats-App-2025-11-30-a-las-16-58-10-b200d8c9.jpg" alt="Jesús 3">
+          <img src="https://i.postimg.cc/MKwqQYmW/Imagen-de-Whats-App-2025-11-30-a-las-16-58-11-c1a4632d.jpg" alt="Jesús 4">
+        </div>
+      </section>
+
+      <!-- Josmary -->
+      <section>
+        <h3>Josmary</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/pT8M999b/Imagen-de-Whats-App-2025-11-30-a-las-16-58-05-556b755b.jpg" alt="Josmary 1">
+          <img src="https://i.postimg.cc/bNLc2fv6/Imagen-de-Whats-App-2025-11-30-a-las-16-58-05-cfaaef9e.jpg" alt="Josmary 2">
+          <img src="https://i.postimg.cc/s2Qt8B4S/Imagen-de-Whats-App-2025-11-30-a-las-16-58-06-05869478.jpg" alt="Josmary 3">
+          <img src="https://i.postimg.cc/CMmfPdPt/Imagen-de-Whats-App-2025-11-30-a-las-17-01-02-0dba748d.jpg" alt="Josmary 4">
+          <img src="https://i.postimg.cc/qqLYn2pV/Imagen-de-Whats-App-2025-11-30-a-las-16-58-06-da4ae2c8.jpg" alt="Josmary 5">
+        </div>
+      </section>
+
+      <!-- Yohan -->
+      <section>
+        <h3>Yohan</h3>
+        <div class="grid">
+          <img src="https://i.postimg.cc/MKwqQYmW/Imagen-de-Whats-App-2025-11-30-a-las-16-58-11-c1a4632d.jpg" alt="Yohan 1">
+          <img src="https://i.postimg.cc/dVzWh5GT/Imagen-de-Whats-App-2025-11-30-a-las-16-59-24-9cfc7efa.jpg" alt="Yohan 2">
+          <img src="https://i.postimg.cc/FRxGnm8M/Imagen-de-Whats-App-2025-11-30-a-las-16-59-24-a64b4f69.jpg" alt="Yohan 3">
+          <img src="https://i.postimg.cc/TY1QQz94/Imagen-de-Whats-App-2025-11-30-a-las-16-59-24-e5f02843.jpg" alt="Yohan 4">
+        </div>
+      </section>
+    </div>
+
+    <!-- Botón de iniciar juego arriba del área -->
+    <button id="startGameBtn" onclick="startGame()">Comenzar juego</button>
+
+    <!-- Área del minijuego -->
+    <div id="gameArea">
+      <div id="floatingScore"></div>
+    </div>
+
+    <!-- Panel de vidas y Game Over -->
+    <div id="lives"></div>
+    <div id="gameOver">💀 Game Over</div>
+    <button id="retryBtn" onclick="retryGame()">Intentar otra vez</button>
+  </div>
+
+  <!-- Modal privado de subida -->
+  <div id="uploadModal">
+    <div class="modalContent">
+      <h3 id="uploadTitle">Subir fotos</h3>
+      <input type="file" id="photoFile" accept="image/*" multiple>
+      <div style="margin-top:10px;">
+        <button onclick="uploadPhotos()">Subir</button>
+        <button onclick="closeUploadModal()">Cerrar</button>
+      </div>
+      <div id="uploadNotice" style="margin-top:8px;color:#ffd700"></div>
+    </div>
+  </div>
+
+  <!-- Modal de visualización de imagen (fullscreen) -->
+  <div id="imageModal" onclick="if(event.target.id==='imageModal') closeImageModal()">
+    <button class="closeBtn" onclick="closeImageModal()">Cerrar</button>
+    <img id="modalImg" src="" alt="Imagen ampliada">
+    <div class="meta">
+      <span id="modalOwner"></span>
+      <button id="imageDelBtn" class="imageDelBtn" style="display:none;" onclick="modalDelete()">Eliminar</button>
+    </div>
+  </div>
+
+  <!-- Modal de PIN (nuevo) -->
+  <div id="pinModal" onclick="if(event.target.id==='pinModal') closePinModal()">
+    <div class="modalContent" role="dialog" aria-modal="true" aria-label="Ingresar PIN">
+      <div style="font-weight:700;margin-bottom:6px;">Introduce el código para saltar el conteo</div>
+      <input id="pinInput" type="password" placeholder="Código" aria-label="Código PIN">
+      <div style="margin-top:10px;">
+        <button id="pinSubmitBtn">Aceptar</button>
+        <button onclick="closePinModal()">Cancelar</button>
+      </div>
+      <div class="pinNotice" id="pinNotice"></div>
+    </div>
+  </div>
+
+  <!-- Modal de PREVIEW después de validar PIN -->
+  <div id="pinPreviewModal" style="display:none;position:fixed;left:0;top:0;width:100%;height:100%;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:3600;" onclick="if(event.target.id==='pinPreviewModal') closePinPreview()">
+    <div class="modalContent" role="dialog" aria-modal="true" aria-label="Vista previa">
+      <h3 style="margin:0 0 8px;">Vista previa - Salto del conteo</h3>
+      <p style="color:#fff;margin:6px 0 12px;">Al confirmar, se mostrará la pantalla final (mensaje, posibilidad de subir fotos y el minijuego) como si el contador hubiera llegado a 0.</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:8px;">
+        <button id="pinPreviewSkipBtn">Saltar ahora</button>
+        <button onclick="closePinPreview()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+/* filepath: c:\Users\carlo\.vscode\Feliz navidad.html */
+(function(){
+  // Configuración: cuenta regresiva al 31 Dic 2025 11:30 PM
+  const targetDate = new Date("2025-12-31T23:30:00");
+
+  // Estado global
+  let countdownTimer = null, snowTimer = null, finalStarted = false;
+  let savedName = localStorage.getItem("userName") || "";
+  let score = 0, record = 0, lives = 3;
+  let launchTimer = null;
+  let modalDeleteTarget = null;
+  let uploadModalOpenFor = null;
+
+  // Inicialización
+  window.addEventListener('load', () => {
+    document.body.classList.add('bg-animate');
+
+    snowTimer = setInterval(createSnowflake, 600);
+    countdownTimer = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    if (savedName) {
+      savedName = formatDisplayName(savedName);
+      const inEl = document.getElementById("userName");
+      if (inEl) inEl.value = savedName;
+      record = parseInt(localStorage.getItem("record_" + savedName) || "0", 10);
+    }
+    setNameUI();
+
+    const input = document.getElementById("userName");
+    if (input) input.addEventListener('input', function(){ this.value = this.value.replace(/\s/g,''); });
+
+    const finalInput = document.getElementById("finalUserName");
+    if (finalInput) finalInput.addEventListener('input', function(){ this.value = this.value.replace(/\s/g,''); });
+
+    loadStoredPhotos();
+    if (savedName) ensureUploadPromptForUser(savedName);
+    loadWishFor(savedName);
+
+    // Delegación de click para abrir modal de imagen (evita múltiples listeners globales)
+    const gallery = document.getElementById('photoGallery');
+    if (gallery) {
+      gallery.addEventListener('click', (e) => {
+        const img = e.target.closest && e.target.closest('img');
+        if (!img) return;
+        // prevenir si clic en botón dentro wrapper
+        if (e.target.tagName.toLowerCase() === 'button') return;
+        openImageModal(img.src, img.dataset.owner || "");
+      });
+    }
+
+    // Asegurar que el botón "Saltar ahora" del preview funcione siempre
+    const previewSkipBtn = document.getElementById('pinPreviewSkipBtn');
+    if (previewSkipBtn) {
+      previewSkipBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        // cerrar preview y ejecutar showFinal con una pequeña demora para evitar solapamientos visuales
+        closePinPreview();
+        setTimeout(()=> { try { showFinal(); } catch(err){ /* no-op */ } }, 40);
+      });
+    }
+  });
+
+  /* ---------------- UI y Nombre ---------------- */
+  function enableNameEditing(){
+    const input = document.getElementById("userName");
+    if (!input) return;
+    input.disabled = false;
+    input.focus();
+    const editBtn = document.getElementById("editNameBtn");
+    if (editBtn) editBtn.style.display = "none";
+  }
+  function saveName() {
+    const rawEl = document.getElementById("userName");
+    if (!rawEl) return;
+    const raw = rawEl.value || "";
+    if (!raw.trim()) { alert("Ingresa un nombre."); return; }
+    const clean = formatDisplayName(raw);
+    savedName = clean;
+    localStorage.setItem("userName", savedName);
+    record = parseInt(localStorage.getItem("record_" + savedName) || "0", 10);
+    alert("Nombre guardado: " + savedName);
+    setNameUI();
+    updateFloatingScore();
+    updateDeleteButtonsVisibility();
+    ensureUploadPromptForUser(savedName);
+    loadWishFor(savedName);
+  }
+  function saveNameFromFinal(){
+    const rawEl = document.getElementById("finalUserName");
+    if (!rawEl) return;
+    const raw = rawEl.value || "";
+    if (!raw.trim()) { alert("Ingresa un nombre."); return; }
+    const clean = formatDisplayName(raw);
+    savedName = clean;
+    localStorage.setItem("userName", savedName);
+    record = parseInt(localStorage.getItem("record_" + savedName) || "0", 10);
+    alert("Nombre guardado: " + savedName);
+    hideFinalNameArea();
+    setNameUI();
+    updateFloatingScore();
+    updateDeleteButtonsVisibility();
+    ensureUploadPromptForUser(savedName);
+    loadWishFor(savedName);
+  }
+  function hideFinalNameArea(){
+    const el = document.getElementById("finalNameArea");
+    if (el) el.style.display = "none";
+    const f = document.getElementById("finalUserName");
+    if (f) f.value = "";
+  }
+  function setNameUI(){
+    const input = document.getElementById("userName");
+    const editBtn = document.getElementById("editNameBtn");
+    if (savedName) {
+      if (input){ input.disabled = true; input.value = savedName; }
+      if (editBtn) editBtn.style.display = "inline-block";
+    } else {
+      if (input){ input.disabled = false; input.value = ""; }
+      if (editBtn) editBtn.style.display = "none";
+    }
+  }
+
+  function formatDisplayName(raw){
+    if (!raw) return "";
+    const first = raw.trim().split(/\s+/)[0];
+    const lower = first.toLowerCase();
+    return lower.charAt(0).toUpperCase() + lower.slice(1);
+  }
+  function normalizeKey(name){ return name.trim().toLowerCase().replace(/\s+/g,'_'); }
+
+  /* ---------------- Countdown y PIN ---------------- */
+  function updateCountdown() {
+    const el = document.getElementById("countdown");
+    if (!el) return;
+    const diff = targetDate.getTime() - Date.now();
+    if (diff <= 0) { showFinal(); return; }
+    const t = Math.floor(diff / 1000);
+    const d = Math.floor(t / 86400);
+    const h = Math.floor((t % 86400) / 3600);
+    const m = Math.floor((t % 3600) / 60);
+    const s = t % 60;
+    el.textContent = `${d}d ${h}h ${m}m ${s}s`;
+  }
+
+  // Reemplazo: openSkipPin ahora abre modal y maneja Enter correctamente
+  function openSkipPin(){
+    // fallback si no existe el modal por alguna razón -> usar prompt
+    const modal = document.getElementById('pinModal');
+    const input = document.getElementById('pinInput');
+    const notice = document.getElementById('pinNotice');
+    if (!modal || !input) {
+      const code = prompt("Introduce código para saltar el conteo:");
+      if (!code) return;
+      validatePinAndAct(code);
+      return;
+    }
+    notice.textContent = '';
+    input.value = '';
+    modal.style.display = 'flex';
+    setTimeout(()=> input.focus(), 50);
+
+    // remover manejadores previos para evitar duplicados
+    input.onkeydown = function(e){
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = (input.value || '').trim();
+        validatePinAndAct(val);
+      }
+    };
+    const submitBtn = document.getElementById('pinSubmitBtn');
+    if (submitBtn) {
+      submitBtn.onclick = function(){ const val = (input.value || '').trim(); validatePinAndAct(val); };
+    }
+  }
+
+  function closePinModal(){
+    const modal = document.getElementById('pinModal');
+    const notice = document.getElementById('pinNotice');
+    if (modal) modal.style.display = 'none';
+    if (notice) notice.textContent = '';
+  }
+
+  function validatePinAndAct(code){
+    if (!code) { alert("Introduce el código."); return; }
+    // comparar sin espacios y case-insensitive
+    const normalized = code.trim().toLowerCase();
+    const valid = ["mickecrack36337336"]; // se pueden añadir más códigos aquí
+    if (valid.indexOf(normalized) !== -1) {
+      // mostrar vista previa y permitir "Saltar ahora"
+      closePinModal();
+      openPinPreview();
+    } else {
+      const notice = document.getElementById('pinNotice');
+      if (notice) { notice.textContent = "Código inválido."; setTimeout(()=> notice.textContent = '', 2200); }
+      // mantener modal abierto para reintento
+    }
+  }
+
+  // abrir el modal de preview
+  function openPinPreview(){
+    const pm = document.getElementById('pinPreviewModal');
+    if (!pm) {
+      // fallback: ejecutar directamente
+      showFinal();
+      return;
+    }
+    pm.style.display = 'flex';
+    const skipBtn = document.getElementById('pinPreviewSkipBtn');
+    if (skipBtn) {
+      skipBtn.onclick = function(){
+        pm.style.display = 'none';
+        showFinal();
+      };
+    }
+  }
+  function closePinPreview(){
+    const pm = document.getElementById('pinPreviewModal');
+    if (pm) pm.style.display = 'none';
+  }
+
+  /* ---------------- Vista Final / Deseo ---------------- */
+  function showFinal() {
+    if (finalStarted) return;
+    finalStarted = true;
+    document.body.classList.remove('bg-animate');
+    document.body.style.backgroundImage = "url('https://i.ibb.co/VYtCBJ3L/star-sky-illustration-background-free-vector.jpg')";
+    const cd = document.getElementById("countdownView");
+    const fv = document.getElementById("finalView");
+    if (cd) cd.style.display = "none";
+    if (fv) fv.style.display = "block";
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    let msg = "🎅 ¡Feliz Año Nuevo";
+    if (savedName) msg += " " + savedName;
+    msg += "! 🎆";
+    const fm = document.getElementById("finalMessage"); if (fm) fm.textContent = msg;
+    const gn = document.getElementById("gameNotice"); if (gn) gn.textContent = "⬇️ Baja hasta el fondo para comenzar un minijuego ⬇️";
+    updateLivesText();
+    updateFloatingScore();
+    if (!savedName) {
+      const fn = document.getElementById("finalNameArea"); if (fn) fn.style.display = "block";
+      setTimeout(()=>{ const f = document.getElementById("finalUserName"); if (f) f.focus(); }, 120);
+    } else {
+      const fn = document.getElementById("finalNameArea"); if (fn) fn.style.display = "none";
+    }
+    loadWishFor(savedName);
+  }
+
+  function saveWish(){
+    const t = document.getElementById("newYearWish");
+    if (!t) return;
+    const txt = t.value.trim();
+    if (!savedName){ alert("Guarda tu nombre antes de guardar un deseo."); return; }
+    localStorage.setItem("wish_" + normalizeKey(savedName), txt);
+    const notice = document.getElementById("wishSaved");
+    if (notice) { notice.textContent = "Deseo guardado."; setTimeout(()=> notice.textContent = "", 2200); }
+  }
+  function loadWishFor(name){
+    const t = document.getElementById("newYearWish");
+    if (!t) return;
+    if (!name) { t.value = ""; return; }
+    t.value = localStorage.getItem("wish_" + normalizeKey(name)) || "";
+  }
+
+  /* ---------------- Fotos (localStorage) ---------------- */
+  function photosKeyFor(name){ return "photos_" + normalizeKey(name); }
+
+  function loadStoredPhotos(){
+    for (let i=0;i<localStorage.length;i++){
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith("photos_")) continue;
+      try {
+        const arr = JSON.parse(localStorage.getItem(key) || "[]");
+        if (!Array.isArray(arr) || arr.length===0) continue;
+        const ownerNorm = key.replace(/^photos_/,'').replace(/_/g,' ');
+        const ownerDisplay = ownerNorm.split(/\s+/).map(s=> s.charAt(0).toUpperCase()+s.slice(1)).join(' ');
+        let sec = findSectionByName(ownerDisplay);
+        if (!sec) sec = addSectionForName(ownerDisplay, true);
+        arr.forEach(dataUrl => renderPhotoInSection(ownerDisplay, dataUrl, true));
+      } catch(e){}
+    }
+    updateDeleteButtonsVisibility();
+  }
+
+  function findSectionByName(name){
+    const sections = document.querySelectorAll("#photoGallery section");
+    const target = String(name).trim().toLowerCase();
+    for (const s of sections){
+      const h = s.querySelector("h3");
+      if (h && h.textContent.trim().toLowerCase() === target) return s;
+    }
+    return null;
+  }
+  function addSectionForName(name, skipScroll, atTop){
+    const gallery = document.getElementById("photoGallery");
+    if (!gallery) return null;
+    const sec = document.createElement("section");
+    const h3 = document.createElement("h3");
+    h3.textContent = name;
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    sec.appendChild(h3);
+    sec.appendChild(grid);
+    if (atTop && gallery.firstElementChild) {
+      gallery.insertBefore(sec, gallery.firstElementChild);
+    } else {
+      gallery.appendChild(sec);
+    }
+    if (!skipScroll) sec.scrollIntoView({behavior:'smooth'});
+    return sec;
+  }
+
+  // Mostrar prompt bajo el wishArea si el usuario tiene nombre pero no sección
+  function showCreateSectionPromptIfNeeded(){
+    const promptContainer = document.getElementById('createSectionPrompt');
+    if (!promptContainer) return;
+    // limpiar
+    promptContainer.innerHTML = '';
+    // sólo mostrar si hay nombre guardado y NO existe sección ya
+    if (!savedName) { promptContainer.style.display = 'none'; return; }
+    const sec = findSectionByName(savedName);
+    if (sec) { promptContainer.style.display = 'none'; return; }
+
+    // crear prompt
+    const btn = document.createElement('button');
+    btn.textContent = '¡Crea tu sección de fotos!';
+    btn.onclick = function(){
+      createSectionAndOpen(savedName);
+    };
+    promptContainer.appendChild(btn);
+    promptContainer.style.display = 'block';
+  }
+
+  // Crea la sección en la parte superior y abre modal de subida
+  function createSectionAndOpen(userName){
+    if (!userName) { alert('Necesitas guardar tu nombre primero.'); return; }
+    // crear sección en top
+    addSectionForName(userName, false, true);
+    // quitar prompt
+    const promptContainer = document.getElementById('createSectionPrompt');
+    if (promptContainer) promptContainer.style.display = 'none';
+    // asegurarse que el prompt de subida dentro de la sección exista
+    ensureUploadPromptForUser(userName);
+    // abrir modal para subir
+    openUploadModalForUser(userName, false);
+    // actualizar botones de borrar visibles
+    updateDeleteButtonsVisibility();
+  }
+
+  // Ajuste: openUploadModalForUser si createIfMissing true ahora puede crear arriba si se desea
+  function openUploadModalForUser(userName, createIfMissing){
+    if (!userName) { alert("Debes tener un nombre guardado para subir fotos."); return; }
+    let section = findSectionByName(userName);
+    if (!section && !createIfMissing){
+      alert("No se encontró tu sección."); return;
+    }
+    if (!section && createIfMissing) {
+      // crear arriba por defecto para nuevos usuarios
+      section = addSectionForName(userName, true, true);
+      const promptEl = document.createElement("div");
+      promptEl.className = "uploadPrompt";
+      promptEl.innerHTML = '<button onclick="openUploadModalForUser(\''+userName.replace(/'/g,"\\'")+'\', true)">¿subir foto?</button>';
+      section.insertBefore(promptEl, section.querySelector(".grid"));
+    }
+    const modal = document.getElementById("uploadModal");
+    if (!modal) return;
+    document.getElementById("uploadTitle").textContent = "Subir fotos para: " + userName;
+    document.getElementById("uploadNotice").textContent = "Solo tú verás este modal; al subir, las fotos serán visibles para todos.";
+    modal.style.display = "flex";
+    uploadModalOpenFor = userName;
+  }
+
+  // Llamar a showCreateSectionPromptIfNeeded en los puntos clave
+  //  - cuando se muestra la vista final
+  const _old_showFinal = showFinal;
+  function showFinal(){
+    _old_showFinal();
+    // después de la lógica previa, mostrar prompt si hace falta
+    showCreateSectionPromptIfNeeded();
+  }
+
+  //  - después de guardar el nombre (desde la pantalla inicial)
+  const _old_saveName = saveName;
+  function saveName(){
+    _old_saveName();
+    showCreateSectionPromptIfNeeded();
+  }
+
+  //  - después de guardar nombre desde la vista final
+  const _old_saveNameFromFinal = saveNameFromFinal;
+  function saveNameFromFinal(){
+    _old_saveNameFromFinal();
+    showCreateSectionPromptIfNeeded();
+  }
+
+  // También ocultar prompt si se crea sección manualmente o al cargar fotos
+  // (loadStoredPhotos ya finaliza con updateDeleteButtonsVisibility)
+  // Llamar showCreateSectionPromptIfNeeded cada vez que actualizamos visibilidad
+  const _old_updateDeleteButtonsVisibility = updateDeleteButtonsVisibility;
+  function updateDeleteButtonsVisibility(){
+    _old_updateDeleteButtonsVisibility();
+    // ocultar prompt si ahora existe sección
+    showCreateSectionPromptIfNeeded();
+  }
+
+  /* ---------------- Modal de imagen fullscreen ---------------- */
+  function openImageModal(src, owner){
+    const modal = document.getElementById('imageModal');
+    if (!modal) return;
+    const modalImg = document.getElementById('modalImg');
+    const ownerEl = document.getElementById('modalOwner');
+    const delBtn = document.getElementById('imageDelBtn');
+    if (modalImg) modalImg.src = src;
+    if (ownerEl) ownerEl.textContent = owner ? 'Propietario: ' + owner : '';
+    if (delBtn){
+      if (savedName && owner && savedName.trim().toLowerCase() === owner.trim().toLowerCase() && src.startsWith('data:')) {
+        delBtn.style.display = 'inline-block';
+        modalDeleteTarget = { owner: owner, src: src };
+      } else {
+        delBtn.style.display = 'none';
+        modalDeleteTarget = null;
+      }
+    }
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', escKeyHandler);
+  }
+  function closeImageModal(){
+    const modal = document.getElementById('imageModal');
+    if (!modal) return;
+    const modalImg = document.getElementById('modalImg');
+    if (modalImg) modalImg.src = '';
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    modalDeleteTarget = null;
+    document.removeEventListener('keydown', escKeyHandler);
+  }
+  function escKeyHandler(e){ if (e.key === 'Escape') closeImageModal(); }
+  function modalDelete(){
+    if (!modalDeleteTarget) return;
+    const { owner, src } = modalDeleteTarget;
+    const imgs = document.querySelectorAll('#photoGallery img');
+    let wrapper = null;
+    imgs.forEach(i=>{
+      if (i.src === src && (i.dataset.owner || '').trim().toLowerCase() === owner.trim().toLowerCase()){
+        wrapper = i.parentElement;
+      }
+    });
+    if (!wrapper) { alert('No se encontró la foto para eliminar.'); return; }
+    if (!confirm('¿Eliminar esta foto?')) return;
+    deleteUploadedPhoto(owner, src, wrapper);
+    closeImageModal();
+  }
+
+  /* ---------------- Juego (resumido) ---------------- */
+  function updateLivesText(){ const el = document.getElementById("lives"); if (el) el.textContent = `❤️ Vidas: ${lives.toFixed(2)}`; }
+  function startGame(){ score = 0; lives = 3; lastExplodedType = null; updateLivesText(); updateFloatingScore(); const area = document.getElementById("gameArea"); Array.from(area.children).forEach(el => { if (el.id !== "floatingScore") area.removeChild(el); }); stopLaunching(); launchTimer = setInterval(launchItem, 1000); }
+  function retryGame(){ document.getElementById("gameOver").style.display = "none"; document.getElementById("retryBtn").style.display = "none"; startGame(); }
+  function stopLaunching(){ if (launchTimer) { clearInterval(launchTimer); launchTimer = null; } }
+
+  function getSpeedMultiplier(){ const v = getComputedStyle(document.documentElement).getPropertyValue('--speed-mult').trim(); return v ? parseFloat(v) : 1; }
+
+  function launchItem(){
+    const area = document.getElementById("gameArea");
+    if (!area) return;
+    const areaWidth = area.clientWidth;
+    const x = Math.random() * (areaWidth - 40);
+    const peak = 120 + Math.random() * 160;
+    let duration = 900 + Math.random() * 1100;
+    duration = Math.floor(duration * getSpeedMultiplier());
+    const r = Math.random();
+    let type;
+    if (r < 0.4) type = "gift";
+    else if (r < 0.8) type = "petardo";
+    else type = "tree";
+    const item = document.createElement("div");
+    item.className = type;
+    item.textContent = type === "gift" ? "🎁" : (type === "petardo" ? "🧨" : "🎄");
+    item.style.left = x + "px";
+    item.style.bottom = "0px";
+    area.appendChild(item);
+    let start = Date.now();
+    const flyTimer = setInterval(function () {
+      const progress = (Date.now() - start) / duration;
+      if (progress >= 1) {
+        clearInterval(flyTimer);
+        item.remove();
+        if (type === "gift") { score = Math.max(0, score - 4); lives = Math.max(0, lives - 1); }
+        else if (type === "petardo") { score = Math.max(0, score - 5); lives = Math.max(0, lives - 1); }
+        updateRecordIfNeeded(); updateFloatingScore(); lives = Math.max(0, lives); updateLivesText(); if (lives <= 0) triggerGameOver();
+      } else {
+        const h = Math.floor(progress * peak);
+        item.style.bottom = h + "px";
+      }
+    }, 20);
+    item.onclick = function () {
+      clearInterval(flyTimer);
+      const height = parseInt(item.style.bottom || "0", 10);
+      const left = parseInt(item.style.left || "0", 10);
+      item.remove();
+      explodeAt(left, height);
+      if (type === "gift") { score += 10; if (lastExplodedType === 'tree') showRobasteNavidad(); lastExplodedType = 'gift'; }
+      else if (type === "petardo") { score += 2; lastExplodedType = 'petardo'; }
+      else if (type === "tree") { score = Math.max(0, score - 20); lives = Math.max(0, lives - 0.25); lastExplodedType = 'tree'; }
+      updateRecordIfNeeded(); updateFloatingScore(); lives = Math.max(0, lives); updateLivesText(); if (lives <= 0) triggerGameOver();
+    };
+  }
+
+  function showRobasteNavidad() {
+    const el = document.getElementById("specialMsg");
+    if (!el) return;
+    el.style.display = "block";
+    document.body.style.backgroundImage = "url('https://i.postimg.cc/RFzGCqKk/hqdefault.jpg')";
+    setTimeout(() => { document.body.style.backgroundImage = "url('https://i.ibb.co/VYtCBJ3L/star-sky-illustration-background-free-vector.jpg')"; }, 1900);
+    clearTimeout(showRobasteNavidad._t);
+    showRobasteNavidad._t = setTimeout(() => { el.style.display = "none"; }, 5000);
+  }
+
+  function updateRecordIfNeeded() {
+    if (score > record) {
+      record = score;
+      if (savedName) localStorage.setItem("record_" + savedName, String(record));
+    }
+  }
+
+  function explodeAt(x, height) {
+    const area = document.getElementById("gameArea");
+    if (!area) return;
+    const explosion = document.createElement("div");
+    explosion.className = "explosion";
+    explosion.textContent = "💥";
+    explosion.style.left = x + "px";
+    explosion.style.bottom = height + "px";
+    area.appendChild(explosion);
+    setTimeout(() => explosion.remove(), 900);
+  }
+
+  /* ---------------- Auxiliares ---------------- */
+  function createSnowflake() {
+    const snow = document.createElement("div");
+    snow.className = "snowflake";
+    snow.textContent = "❄️";
+    snow.style.left = Math.floor(Math.random() * window.innerWidth) + "px";
+    snow.style.animationDuration = (5 + Math.random() * 5) + "s";
+    document.body.appendChild(snow);
+    setTimeout(() => snow.remove(), 12000);
+  }
+
+  function updateLivesText(){ const el = document.getElementById("lives"); if (el) el.textContent = `❤️ Vidas: ${lives.toFixed(2)}`; }
+  function updateFloatingScore(){ const el = document.getElementById("floatingScore"); if (!el) return; const nameForRecord = savedName || "Invitado"; el.textContent = `Puntos: ${score} | Record: ${record} (${nameForRecord})`; }
+
+  // Exponer funciones necesarias por atributos onclick en HTML
+  window.openSkipPin = openSkipPin;
+  window.closePinModal = closePinModal;
+  window.openPinPreview = openPinPreview;
+  window.closePinPreview = closePinPreview;
+  window.showFinal = showFinal;
+  window.saveName = saveName;
+  window.enableNameEditing = enableNameEditing;
+  window.saveNameFromFinal = saveNameFromFinal;
+  window.hideFinalNameArea = hideFinalNameArea;
+  window.openUploadModalForUser = openUploadModalForUser;
+  window.closeUploadModal = closeUploadModal;
+  window.uploadPhotos = uploadPhotos;
+  window.deleteUploadedPhoto = deleteUploadedPhoto;
+  window.updateDeleteButtonsVisibility = updateDeleteButtonsVisibility;
+  window.triggerGameOver = triggerGameOver;
+  window.startGame = startGame;
+  window.retryGame = retryGame;
+  window.openImageModal = openImageModal;
+  window.closeImageModal = closeImageModal;
+  window.modalDelete = modalDelete;
+  window.saveWish = saveWish;
+  window.loadWishFor = loadWishFor;
+})();
+</script>
+</body>
+</html>
